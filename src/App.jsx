@@ -1,28 +1,36 @@
 import React from "react";
 import {BrowserRouter as Router,Routes,Route} from "react-router-dom";
+import {CssBaseline, Container, Box} from '@mui/material';
+import "./App.css";
 
 // Importando componentes. //
 import Navbar from "./components/Navbar"
-import Home from "./components/Home";
 import Penaltys from "./components/Penaltys";
 import Informacion from "./components/Informacion";
+import Footer from './components/Footer';
 
 function App() {
   return (
     <Router>
-      <div className="App">
+      <CssBaseline></CssBaseline>
+      <Box display="flex" flexDirection="column" minHeight="100vh">
+     
       
-        <header className="App-header">
+        <header>
           <Navbar></Navbar>
         </header>
-
-        
-          <Routes>
-            <Route path="/" element={<Home/>}></Route>
-            <Route path="/penaltys" element={<Penaltys/>}></Route>
-            <Route path="/informacion" element={<Informacion/>}></Route>
-          </Routes>
-      </div>
+          <Box component="main" flex={1} sx={{backgroundImage:'url(/assets/fondo-futbol.jpg)', backgroundRepeat:'no-repeat', backgroundSize:'cover',}}>
+            <Container maxWidth="lg" sx={{py:4}}>
+              <Routes>
+                <Route path="/" element={<Penaltys/>}></Route>
+                <Route path="/informacion" element={<Informacion/>}></Route>
+              </Routes>
+            </Container>
+          </Box>
+          <footer>
+            <Footer></Footer>
+          </footer>
+        </Box>
     </Router>
   );
 }

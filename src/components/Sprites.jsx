@@ -1,4 +1,4 @@
-import React, {useEffect,useRef} from 'react';
+import React, {useEffect,useState,useRef} from 'react';
 import {Container} from '@mui/material';
 import gsap from 'gsap';
 
@@ -12,11 +12,14 @@ const Sprites = ({animar, tipo, botonSeleccionado}) =>{
     const spriteJugadorRef = useRef(null);
     const spritePelotaRef = useRef(null);
 
+    // Penal finalizado, reiniciar penal. //
+    const [penalFinalizado, setPenalFinalizado] = useState(false);
+
 useEffect(()=>{
 
     if(botonSeleccionado === null || botonSeleccionado === undefined) return;
 
-    if (animar){
+    
         const timeline = gsap.timeline();
 
         const posicionesArquero = [
@@ -29,25 +32,20 @@ useEffect(()=>{
             {x:100,y:100,sprite:'./assets/sprites-arquero-futbol-7.png'}, // Equivale al botón 7. //
         ];
 
-        // const posicionPelota = [
-        //     {x:-100,y:-100}, // Equivale al botón 1. //
-        //     {x:-100,y:0}, // Equivale al botón 2. //
-        //     {x:-100,y:100}, // Equivale al botón 3. //
-        //     {x:0,y:0}, // Equivale al botón 4 (centro). //
-        //     {x:100,y:-100}, // Equivale al botón 5. //
-        //     {x:100,y:0}, // Equivale al botón 6. //
-        //     {x:100,y:100}, // Equivale al botón 7. //
-        // ];
-
 
         // Con esta validación nos aseguramos de qu el índice no esté fuera de rango. //
         const index = Number(botonSeleccionado) -1;
         
-        if (!isNaN(index) && index >= 0 && index < posicionesArquero.length){
+        if (isNaN(index) && index >= 0 && index < posicionesArquero.length){
+                console.error("Valor de botonSeleccionado fuera de rango.")
+            return;
+        }
+            
             const {x,y} = posicionesArquero[index];
         
-        // Arquero cambiando de posición. (Cambio de frames). //
-        if(tipo==='arquero' && spriteArqueroRef.current){
+
+        // Arquero cambiando de frames y posición. //
+    if(tipo==='arquero' && spriteArqueroRef.current){
         timeline
     .to(spriteArqueroRef.current,{
         backgroundPositionX:`-${frameWidth * (totalFrames - 1)}px`,
@@ -55,25 +53,37 @@ useEffect(()=>{
         duration: 1,
     })
     .to(spriteArqueroRef.current,{
-        duration:2,
+        duration:1.4,
         x: 50 + x,
         y: 50 + y,
         ease:'power1.in',
         delay:1,
-    },0)
-}
-
-if(tipo==='jugador'&&spriteJugadorRef.current){
+    },0).to(spriteArqueroRef.current,{
+        duration: 1,
+        top: '200px',
+        delay:1.4,
+    },).eventCallback("onComplete",()=>{
+        //Esto va a finalizarse cuando las animaciones de la pelota finalicen. //
+        setPenalFinalizado(true);
+    });
+    // Jugador cambiando de frames y posición. //
+}else if(tipo==='jugador'&&spriteJugadorRef.current){
         timeline
         .to(spriteJugadorRef.current,{
             duration:2,
-            left:'70%',
+            left:'52%',
             bottom:'12%',
             transform:'translateX(-50%)',
             ease:'power1.in',
-        },0);}
-
-    if(tipo==='pelota'&&spritePelotaRef.current){
+        },).to(spriteRef.current,{
+            delay:2
+        })
+        .eventCallback("onComplete",()=>{
+            //Esto va a finalizarse cuando las animaciones de la pelota finalicen. //
+            setPenalFinalizado(true);
+        });;
+         // Pelota cambiando de Frames y posición. //
+    }else if(tipo==='pelota'&&spritePelotaRef.current){
         // Obtenemos las coordenadas del botón seleccionado. //
         const boton = document.getElementById(`boton-${botonSeleccionado}`);
         const arco = document.querySelector('#arco')
@@ -103,17 +113,59 @@ if(tipo==='jugador'&&spriteJugadorRef.current){
                 top: destinoY + offsetY + "px",
                 ease: "power1.inOut",
                 delay:1,
-            },0).to(spritePelotaRef.current,{
+            },0)
+            .to(spritePelotaRef.current,{
                 duration: 0.6,
                 top: "30%",
                 ease:"power2.Out",
-            },"+=0.1");
+                delay:'1',
+            },"+=0.1")
+            .eventCallback("onComplete",()=>{
+                //Esto va a finalizarse cuando las animaciones de la pelota finalicen. //
+                setPenalFinalizado(true);
+            });
         }
-    } else{
-    console.error('Valor de botonSeleccionado fuera de rango.')
+    },[animar,botonSeleccionado,tipo]);
+
+    const resetAnimation=()=>{
+        
+        if(spriteArqueroRef.current){
+            gsap.set(spriteArqueroRef.current,{
+                left:'50%',
+                top:'80px',
+                transform:'translateX(-50%)',
+                backgroundPosition:'0px 0px',
+                x:0,
+                y:0,
+            });
+    }if(spriteJugadorRef.current){
+        gsap.set(spriteJugadorRef.current,{
+            bottom:'-4%',
+            left: '20%',
+            transform:'translateX(-50%)',
+            backgroundPosition:'0px 0px',
+            x:0,
+            y:0,
+        });
+}if(spritePelotaRef.current){
+    gsap.set(spritePelotaRef.current,{
+        left:'262px',
+        top: '452px',
+        backgroundPosition:'0px 0px',
+       
+    });
 }
-}   
-},[animar,botonSeleccionado,tipo]);
+    };
+
+    useEffect(()=>{
+        if(penalFinalizado){
+            resetAnimation();
+            setTimeout(()=>{
+                setPenalFinalizado(false);
+            },2000);
+        }
+    },[penalFinalizado]);
+
 
 
     return(
@@ -140,14 +192,15 @@ if(tipo==='jugador'&&spriteJugadorRef.current){
                 <div ref={spriteJugadorRef}
                 style={{
                     position: 'absolute',
-                    bottom:'0',
-                    left: '50%',
+                    bottom:'-4%',
+                    left: '20%',
                     transform: 'translateX(-50%)',
                     width:`${frameWidth}px`,
                     height:'200px',
                     backgroundImage:'url(./assets/sprites-jugador-futbol.png)',
                     backgroundRepeat:'no-repeat',
                     backgroundPosition:'0px 0px',
+                    zIndex:'4',
                     backgroundSize:`${frameWidth * totalFrames}px 200px`}}
                 ></div>
             )}
@@ -158,7 +211,6 @@ if(tipo==='jugador'&&spriteJugadorRef.current){
                     position: 'absolute',
                     bottom:'12%',
                     left: '40%',
-
                     width:`${frameWidth}px`,
                     height:'200px',
                     backgroundImage:'url(./assets/sprites-pelota-futbol.png)',
