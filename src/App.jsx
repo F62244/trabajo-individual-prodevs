@@ -19,8 +19,8 @@ function App() {
         <header>
           <Navbar></Navbar>
         </header>
-          <Box component="main" flex={1} sx={{backgroundImage:'url(/assets/fondo-futbol.jpg)', backgroundRepeat:'no-repeat', backgroundSize:'cover',}}>
-            <Container maxWidth="lg" sx={{py:4}}>
+          <Box component="main" flex={1} sx={{backgroundImage:'url(/assets/fondo-futbol.jpg)', backgroundRepeat:'no-repeat', backgroundSize:'cover'}}>
+            <Container Width="lg" sx={{py:6}}>
               <Routes>
                 <Route path="/" element={<Penaltys/>}></Route>
                 <Route path="/informacion" element={<Informacion/>}></Route>

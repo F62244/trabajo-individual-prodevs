@@ -8,10 +8,10 @@ const Footer=()=>{
     const theme = useTheme();
 
     return(
-       
-            <Box component="img" src="/assets/footer-fondo.jpg" sx={{width:'100%', height:'40vh', backgroundRepeat:'no-repeat',backgroundSize:'cover'}}>
-
-            </Box>
+                <Box component="img" src="/assets/footer-fondo.jpg" sx={{width:'100%', height:'40vh', backgroundRepeat:'no-repeat',backgroundSize:'cover',height:'60vh'}}>
+                </Box>
+        
+            
       
     )
 

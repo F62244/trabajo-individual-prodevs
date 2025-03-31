@@ -13,6 +13,11 @@ main{
   flex: 1;
 }
 
+.sprite{
+  width: 400px;
+  height: 400px;
+}
+
 footer{
   height: 100%;
 }

@@ -4,8 +4,10 @@ import gsap from 'gsap';
 
 const Sprites = ({animar, tipo, botonSeleccionado}) =>{
     const spriteRef = useRef(null);
-    const frameWidth = 200;
-    const totalFrames = 8;
+    const frameWidth = 400;
+    const totalFrames = 12;
+
+    const [spriteArquero, setSpriteArquero] = useState('./assets/sprites-arquero-futbol-1.png');
 
     // Refs para los sprites. //
     const spriteArqueroRef = useRef(null);
@@ -15,6 +17,13 @@ const Sprites = ({animar, tipo, botonSeleccionado}) =>{
     // Penal finalizado, reiniciar penal. //
     const [penalFinalizado, setPenalFinalizado] = useState(false);
 
+    //Con esto calculamos cuando debe caer el arquero para llegar al suelo.
+    const calcularCaida = (y) =>{
+        if (y===-140) return 260;
+        if (y===-80) return 180;
+        if (y===0) return null;
+    }
+
 useEffect(()=>{
 
     if(botonSeleccionado === null || botonSeleccionado === undefined) return;
@@ -23,30 +32,34 @@ useEffect(()=>{
         const timeline = gsap.timeline();
 
         const posicionesArquero = [
-            {x:-100,y:-100,sprite:'./assets/sprites-arquero-futbol-1.png'}, // Equivale al botón 1. //
-            {x:-100,y:0,sprite:'./assets/sprites-arquero-futbol-2.png'}, // Equivale al botón 2. //
-            {x:-100,y:100,sprite:'./assets/sprites-arquero-futbol-3.png'}, // Equivale al botón 3. //
-            {x:0,y:0,sprite:'./assets/sprites-arquero-futbol-4.png'}, // Equivale al botón 4 (centro). //
-            {x:100,y:-100,sprite:'./assets/sprites-arquero-futbol-5.png'}, // Equivale al botón 5. //
-            {x:100,y:0,sprite:'./assets/sprites-arquero-futbol-6.png'}, // Equivale al botón 6. //
-            {x:100,y:100,sprite:'./assets/sprites-arquero-futbol-7.png'}, // Equivale al botón 7. //
+            {x:-100,y:-140,sprite:'./assets/sprites-arquero-futbol-1.png'}, // Equivale al botón 1. //
+            {x:-100,y:-80,sprite:'./assets/sprites-arquero-futbol-2.png'}, // Equivale al botón 2. //
+            {x:-160,y:0,sprite:'./assets/sprites-arquero-futbol-3.png'}, // Equivale al botón 3. //
+            {x:-40,y:-40,sprite:'./assets/sprites-arquero-futbol-4.png'}, // Equivale al botón 4 (centro). //
+            {x:100,y:-140,sprite:'./assets/sprites-arquero-futbol-5.png'}, // Equivale al botón 5. //
+            {x:100,y:-80,sprite:'./assets/sprites-arquero-futbol-6.png'}, // Equivale al botón 6. //
+            {x:160,y:0,sprite:'./assets/sprites-arquero-futbol-7.png'}, // Equivale al botón 7. //
         ];
 
 
         // Con esta validación nos aseguramos de qu el índice no esté fuera de rango. //
         const index = Number(botonSeleccionado) -1;
         
-        if (isNaN(index) && index >= 0 && index < posicionesArquero.length){
+        if (isNaN(index) || index < 0 || index >= posicionesArquero.length){
                 console.error("Valor de botonSeleccionado fuera de rango.")
             return;
         }
             
-            const {x,y} = posicionesArquero[index];
+            const {x,y,sprite} = posicionesArquero[index];
+            const caida = calcularCaida(y);
+
+            setSpriteArquero(sprite);
         
 
         // Arquero cambiando de frames y posición. //
     if(tipo==='arquero' && spriteArqueroRef.current){
         timeline
+        
     .to(spriteArqueroRef.current,{
         backgroundPositionX:`-${frameWidth * (totalFrames - 1)}px`,
         ease: "steps("+(totalFrames - 1) +")",
@@ -60,26 +73,31 @@ useEffect(()=>{
         delay:1,
     },0).to(spriteArqueroRef.current,{
         duration: 1,
-        top: '200px',
+        top:`${caida}px`,
         delay:1.4,
     },).eventCallback("onComplete",()=>{
-        //Esto va a finalizarse cuando las animaciones de la pelota finalicen. //
+        //Esto va a finalizarse cuando las animaciones del arquero finalicen. //
         setPenalFinalizado(true);
     });
     // Jugador cambiando de frames y posición. //
 }else if(tipo==='jugador'&&spriteJugadorRef.current){
-        timeline
-        .to(spriteJugadorRef.current,{
+            timeline
+            .to(spriteJugadorRef.current,{
+            backgroundPositionX:`-${frameWidth * (totalFrames - 1)}px`,
+            ease: "steps("+(totalFrames - 1) +")",
+            duration: 3,
+
+        },"<").to(spriteJugadorRef.current,{
             duration:2,
             left:'52%',
             bottom:'12%',
             transform:'translateX(-50%)',
             ease:'power1.in',
-        },).to(spriteRef.current,{
-            delay:2
+        },"<").to(spriteRef.current,{
+            delay:1
         })
         .eventCallback("onComplete",()=>{
-            //Esto va a finalizarse cuando las animaciones de la pelota finalicen. //
+            //Esto va a finalizarse cuando las animaciones del jugador finalicen. //
             setPenalFinalizado(true);
         });;
          // Pelota cambiando de Frames y posición. //
@@ -131,8 +149,8 @@ useEffect(()=>{
         
         if(spriteArqueroRef.current){
             gsap.set(spriteArqueroRef.current,{
-                left:'50%',
-                top:'80px',
+                left:'48%',
+                top:'120px',
                 transform:'translateX(-50%)',
                 backgroundPosition:'0px 0px',
                 x:0,
@@ -175,16 +193,16 @@ useEffect(()=>{
                 <div ref={spriteArqueroRef}
                     style={{
                         position: 'absolute',
-                        top: '80px',
-                        left: '50%',
+                        top: '120px',
+                        left: '48%',
                         transform: 'translateX(-50%)',
                         width:`${frameWidth}px`,
-                        height:'200px',
-                        backgroundImage: `url(./assets/sprites-arquero-futbol-1.png)`,
+                        height:'220px',
+                        backgroundImage: `url(${spriteArquero})`,
                         backgroundRepeat:'no-repeat',
                         backgroundPosition:'0px 0px',
-                        zIndex:'8',
-                        backgroundSize:`${frameWidth * totalFrames}px 200px`}}
+                        zIndex:'4',
+                        backgroundSize:`${frameWidth * totalFrames}px 220px`}}
                 ></div>
             )}
 
@@ -196,12 +214,12 @@ useEffect(()=>{
                     left: '20%',
                     transform: 'translateX(-50%)',
                     width:`${frameWidth}px`,
-                    height:'200px',
+                    height:'320px',
                     backgroundImage:'url(./assets/sprites-jugador-futbol.png)',
                     backgroundRepeat:'no-repeat',
                     backgroundPosition:'0px 0px',
-                    zIndex:'4',
-                    backgroundSize:`${frameWidth * totalFrames}px 200px`}}
+                    zIndex:'8',
+                    backgroundSize:`${frameWidth * totalFrames}px 320px`}}
                 ></div>
             )}
 
@@ -209,14 +227,15 @@ useEffect(()=>{
                 <div ref={spritePelotaRef}
                 style={{
                     position: 'absolute',
-                    bottom:'12%',
-                    left: '40%',
+                    bottom:'-2%',
+                    left: '20%',
                     width:`${frameWidth}px`,
-                    height:'200px',
+                    height:'320px',
                     backgroundImage:'url(./assets/sprites-pelota-futbol.png)',
                     backgroundRepeat:'no-repeat',
                     backgroundPosition:'0px 0px',
-                    backgroundSize:`${frameWidth * totalFrames}px 200px`}}
+                    zIndex:'6',
+                    backgroundSize:`${frameWidth * totalFrames}px 320px`,}}
                 ></div>
             )}
             </div>
